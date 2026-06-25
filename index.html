@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lavash Ustasi — Buyurtma</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -32,7 +34,28 @@
     padding: 22px 18px 14px;
     background: linear-gradient(180deg, #FFFDF8 0%, var(--bg) 100%);
     border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 25;
+    transition: box-shadow .25s ease, backdrop-filter .25s ease, background .25s ease;
   }
+  .topbar.scrolled{
+    background: rgba(250,246,236,.88);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 6px 18px rgba(38,28,18,.10);
+  }
+  .shop-meta{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-top:9px;
+    font-size:12.5px;
+    font-weight:700;
+    color: var(--ink);
+  }
+  .shop-meta .stars{ color:#C97E1B; }
+  .shop-meta .dot{ color: var(--ink-soft); font-weight:400; }
+  .shop-meta .orders{ color: var(--ink-soft); font-weight:600; }
   .topbar .eyebrow{
     font-size: 12px;
     letter-spacing: .12em;
@@ -277,6 +300,95 @@
     font-size:13.5px;
     padding: 30px 0;
   }
+
+  .location-btn{
+    width:100%;
+    margin-top:12px;
+    border:1px dashed var(--olive);
+    background: #fff;
+    color: var(--olive);
+    font-weight:700;
+    font-size:13px;
+    padding: 11px 0;
+    border-radius: 12px;
+    cursor:pointer;
+  }
+  .location-chip{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-top:12px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size:12px;
+    font-weight:600;
+    color: var(--olive);
+  }
+  .location-chip button{
+    background:none; border:none;
+    color: var(--brick);
+    font-size:11.5px;
+    font-weight:700;
+    cursor:pointer;
+    flex:0 0 auto;
+  }
+  .map-overlay{
+    position:fixed; inset:0;
+    background: var(--bg);
+    z-index: 60;
+    display:flex;
+    flex-direction:column;
+    transform: translateY(100%);
+    transition: transform .28s ease;
+  }
+  .map-overlay.show{ transform: translateY(0); }
+  .map-header{
+    padding: 16px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom: 1px solid var(--line);
+    flex:0 0 auto;
+  }
+  .map-header h3{
+    font-family:'Archivo Black', sans-serif;
+    font-size:16px;
+    margin:0;
+  }
+  .map-header button{
+    border:none; background:none;
+    font-size:22px;
+    color: var(--ink-soft);
+    cursor:pointer;
+  }
+  #mapContainer{
+    flex-grow:1;
+  }
+  .map-footer{
+    padding: 14px 18px 24px;
+    border-top: 1px solid var(--line);
+    flex:0 0 auto;
+  }
+  .map-hint{
+    font-size:12px;
+    color: var(--ink-soft);
+    text-align:center;
+    margin: 0 0 10px;
+  }
+  .confirm-location-btn{
+    width:100%;
+    border:none;
+    background: var(--olive);
+    color:#fff;
+    font-weight:800;
+    font-size:14.5px;
+    padding: 14px 0;
+    border-radius: 14px;
+    cursor:pointer;
+  }
 </style>
 </head>
 <body>
@@ -300,12 +412,29 @@
 <div class="drawer" id="cartDrawer">
   <h2>Savatingiz</h2>
   <div id="cartItems"></div>
-  <textarea id="noteField" rows="2" placeholder="Manzil yoki izoh (ixtiyoriy)"></textarea>
+  <button class="location-btn" id="pickLocationBtn">📍 Manzilni xaritadan tanlash</button>
+  <div class="location-chip" id="locationChip" style="display:none;">
+    <span id="locationChipText">📍 Manzil tanlandi</span>
+    <button id="changeLocationBtn">O'zgartirish</button>
+  </div>
+  <textarea id="noteField" rows="2" placeholder="Qo'shimcha izoh: xonadon raqami, telefon va h.k. (ixtiyoriy)"></textarea>
   <div class="subtotal">
     <span>Jami</span>
     <span id="drawerTotal">0 so'm</span>
   </div>
   <button class="order-btn" id="submitOrder">Buyurtma berish</button>
+</div>
+
+<div class="map-overlay" id="mapOverlay">
+  <div class="map-header">
+    <h3>Manzilni tanlang</h3>
+    <button id="closeMapBtn">✕</button>
+  </div>
+  <div id="mapContainer"></div>
+  <div class="map-footer">
+    <p class="map-hint">Xaritani suring yoki bossangiz, belgi (pin) o'sha joyga ko'chadi</p>
+    <button class="confirm-location-btn" id="confirmLocationBtn">Shu manzilni tasdiqlash</button>
+  </div>
 </div>
 
 <script>
@@ -460,14 +589,68 @@ function closeDrawer(){
 document.getElementById('cartTicket').onclick = openDrawer;
 document.getElementById('overlay').onclick = closeDrawer;
 
+/* ===== Manzilni xaritadan tanlash ===== */
+let selectedLocation = null; // {lat, lng}
+let leafletMap = null;
+let leafletMarker = null;
+const DEFAULT_CENTER = [41.311081, 69.279737]; // Toshkent markazi — zaxira nuqta
+
+function openMapPicker(){
+  document.getElementById('mapOverlay').classList.add('show');
+  setTimeout(() => {
+    if (!leafletMap){
+      leafletMap = L.map('mapContainer', { zoomControl: true }).setView(DEFAULT_CENTER, 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(leafletMap);
+      leafletMarker = L.marker(DEFAULT_CENTER, { draggable: true }).addTo(leafletMap);
+      leafletMap.on('click', (e) => { leafletMarker.setLatLng(e.latlng); });
+    }
+    leafletMap.invalidateSize();
+  }, 50);
+
+  if (navigator.geolocation){
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const coords = [pos.coords.latitude, pos.coords.longitude];
+      if (leafletMap){ leafletMap.setView(coords, 16); leafletMarker.setLatLng(coords); }
+    }, () => { /* ruxsat berilmadi — standart markazda qoladi */ }, { timeout: 6000 });
+  }
+}
+
+function closeMapPicker(){
+  document.getElementById('mapOverlay').classList.remove('show');
+}
+
+document.getElementById('pickLocationBtn').onclick = openMapPicker;
+document.getElementById('changeLocationBtn').onclick = openMapPicker;
+document.getElementById('closeMapBtn').onclick = closeMapPicker;
+
+document.getElementById('confirmLocationBtn').onclick = () => {
+  const pos = leafletMarker.getLatLng();
+  selectedLocation = { lat: pos.lat.toFixed(6), lng: pos.lng.toFixed(6) };
+  document.getElementById('locationChipText').textContent = `📍 Manzil tanlandi (${selectedLocation.lat}, ${selectedLocation.lng})`;
+  document.getElementById('locationChip').style.display = 'flex';
+  document.getElementById('pickLocationBtn').style.display = 'none';
+  if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+  closeMapPicker();
+};
+/* ===== /Manzil tanlash ===== */
+
 document.getElementById('submitOrder').onclick = () => {
   const entries = cartEntries();
-  if (entries.length === 0) return;
+  if (entries.length === 0){
+    if (tg && tg.showAlert) tg.showAlert("Avval savatga mahsulot qo'shing");
+    else alert("Avval savatga mahsulot qo'shing");
+    return;
+  }
   const note = document.getElementById('noteField').value.trim();
   let text = `🛍 Yangi buyurtma — ${CONFIG.shopName}\n\n`;
   entries.forEach(p => { text += `${p.emoji} ${p.name} × ${p.qty} — ${fmt(p.price * p.qty)}\n`; });
   text += `\nJami: ${fmt(cartTotal())}`;
-  if (note) text += `\n\n📍 Izoh: ${note}`;
+  if (selectedLocation){
+    text += `\n\n📍 Manzil (xarita): https://www.google.com/maps?q=${selectedLocation.lat},${selectedLocation.lng}`;
+  }
+  if (note) text += `\n📝 Izoh: ${note}`;
 
   const url = `https://t.me/${CONFIG.shopTelegramUsername}?text=${encodeURIComponent(text)}`;
   if (tg && tg.openTelegramLink) {
@@ -487,4 +670,6 @@ if (tg) {
 }
 </script>
 </body>
-</html>
+    </html>
+  
+    
