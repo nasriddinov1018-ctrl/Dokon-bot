@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Lavash Ustasi — Buyurtma</title>
+<title>Lavash Ustasi — Premium Buyurtma</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -11,15 +11,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #FAF6EC;
-    --ink: #261C12;
-    --ink-soft: #6B5E4D;
-    --olive: #4E6038;
-    --saffron: #E8A23A;
-    --brick: #B3472E;
-    --card: #FFFFFF;
-    --line: #ECE3D2;
-    --radius: 18px;
+    --bg: #0E0C0A;
+    --surface: #17140F;
+    --surface2: #1F1B15;
+    --ink: #F4EEE3;
+    --ink-dim: #A89C8A;
+    --gold: #E3A53D;
+    --gold-soft: #F0C36B;
+    --line: #2B251D;
+    --radius: 16px;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; padding:0;}
@@ -30,199 +30,203 @@
     padding-bottom: 110px;
     overscroll-behavior-y: contain;
   }
-  .topbar{
-    padding: 22px 18px 14px;
-    background: linear-gradient(180deg, #FFFDF8 0%, var(--bg) 100%);
-    border-bottom: 1px solid var(--line);
+
+  /* ===== Hero ===== */
+  .hero{
+    position:relative;
+    height: 280px;
+    background-image: url('images/hero-bg.jpg');
+    background-size: cover;
+    background-position: center 32%;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(14,12,10,.10) 0%, rgba(14,12,10,.55) 55%, rgba(14,12,10,.98) 100%);
+  }
+  .hero-content{
+    position:absolute; left:20px; right:20px; bottom:16px; z-index:2;
+  }
+  .hero .eyebrow{
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: 11px;
+    color: var(--gold-soft);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .hero h1{
+    font-family:'Archivo Black', sans-serif;
+    font-size: 30px;
+    color:#fff;
+    margin: 0 0 6px;
+    line-height: 1.05;
+    text-shadow: 0 2px 14px rgba(0,0,0,.45);
+  }
+  .hero p{
+    margin:0;
+    font-size: 13px;
+    color: rgba(255,255,255,.8);
+  }
+  .hero .meta{
+    display:flex; align-items:center; gap:6px;
+    margin-top: 9px;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .hero .meta .gold{ color: var(--gold-soft); }
+  .hero .meta .dim{ color: rgba(255,255,255,.62); font-weight:500; }
+
+  /* ===== Categories ===== */
+  .categories{
     position: sticky;
     top: 0;
     z-index: 25;
-    transition: box-shadow .25s ease, backdrop-filter .25s ease, background .25s ease;
-  }
-  .topbar.scrolled{
-    background: rgba(250,246,236,.88);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 6px 18px rgba(38,28,18,.10);
-  }
-  .shop-meta{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    margin-top:9px;
-    font-size:12.5px;
-    font-weight:700;
-    color: var(--ink);
-  }
-  .shop-meta .stars{ color:#C97E1B; }
-  .shop-meta .dot{ color: var(--ink-soft); font-weight:400; }
-  .shop-meta .orders{ color: var(--ink-soft); font-weight:600; }
-  .topbar .eyebrow{
-    font-size: 12px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--olive);
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-  .topbar h1{
-    font-family:'Archivo Black', sans-serif;
-    font-size: 28px;
-    line-height: 1.05;
-    margin: 0 0 6px;
-    color: var(--ink);
-  }
-  .topbar p{
-    margin:0;
-    font-size: 13.5px;
-    color: var(--ink-soft);
-  }
-  .categories{
     display:flex;
     gap:8px;
     overflow-x:auto;
     padding: 14px 18px;
+    background: rgba(14,12,10,.94);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
     scrollbar-width:none;
   }
   .categories::-webkit-scrollbar{display:none;}
   .pill{
     flex:0 0 auto;
-    padding: 8px 16px;
+    padding: 7px 16px;
     border-radius: 999px;
-    background: var(--card);
+    background: var(--surface);
     border: 1px solid var(--line);
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 600;
-    color: var(--ink-soft);
+    color: var(--ink-dim);
     white-space:nowrap;
     cursor:pointer;
   }
   .pill.active{
-    background: var(--olive);
-    border-color: var(--olive);
-    color: #fff;
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #1B1304;
   }
+
+  /* ===== Grid / Cards ===== */
   .grid{
     display:grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    padding: 4px 18px 18px;
+    gap: 14px;
+    padding: 16px 18px 18px;
   }
   .card{
-    background: var(--card);
+    background: var(--surface);
     border-radius: var(--radius);
-    border: 1px solid var(--line);
-    padding: 14px 12px 12px;
-    display:flex;
-    flex-direction:column;
+    overflow:hidden;
     animation: rise .35s ease both;
   }
   @keyframes rise{
     from{opacity:0; transform: translateY(8px);}
     to{opacity:1; transform: translateY(0);}
   }
-  .card .emoji{
-    font-size: 34px;
-    line-height:1;
-    margin-bottom: 8px;
-  }
-  .card .name{
-    font-weight: 700;
-    font-size: 14.5px;
-    margin-bottom: 2px;
-  }
-  .card .desc{
-    font-size: 12px;
-    color: var(--ink-soft);
-    margin-bottom: 10px;
-    flex-grow:1;
-  }
-  .card .row{
-    display:flex;
-    align-items:center;
-    justify-content: space-between;
-  }
-  .price{
-    font-weight: 800;
-    font-size: 14px;
-    color: var(--brick);
-  }
-  .stepper{
-    display:flex;
-    align-items:center;
-    border-radius: 999px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-  }
-  .stepper button{
-    width:28px; height:28px;
-    border:none;
-    background:none;
-    font-size:16px;
-    font-weight:700;
-    color: var(--olive);
-    cursor:pointer;
-  }
-  .stepper .qty{
-    min-width: 18px;
-    text-align:center;
-    font-weight:700;
-    font-size:13px;
-  }
-  .add-btn{
-    border:none;
-    background: var(--saffron);
-    color: #2B1B05;
-    font-weight: 800;
-    font-size: 13px;
-    padding: 8px 0;
-    border-radius: 999px;
+  .img-wrap{
+    position:relative;
     width:100%;
+    aspect-ratio: 1/1;
+    background: var(--surface2);
+  }
+  .img-wrap img{
+    width:100%; height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .img-fallback{
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 34px;
+  }
+  .add-fab{
+    position:absolute; right:8px; bottom:8px;
+    width:32px; height:32px;
+    border-radius:50%;
+    border:none;
+    background: var(--gold);
+    color:#1B1304;
+    font-size:18px;
+    font-weight:800;
+    display:flex; align-items:center; justify-content:center;
     cursor:pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,.4);
+  }
+  .stepper-fab{
+    position:absolute; right:8px; bottom:8px;
+    display:flex; align-items:center;
+    background: var(--gold);
+    border-radius:999px;
+    padding: 2px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.4);
+  }
+  .stepper-fab button{
+    width:26px; height:26px;
+    border:none; background:none;
+    color:#1B1304;
+    font-size:15px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .stepper-fab .qty{
+    min-width:16px;
+    text-align:center;
+    font-size:12px;
+    font-weight:800;
+    color:#1B1304;
+  }
+  .card .body{ padding: 10px 12px 12px; }
+  .card .name{
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 3px;
+    line-height: 1.25;
+  }
+  .card .price{
+    font-size: 13.5px;
+    font-weight: 800;
+    color: var(--gold-soft);
   }
 
-  /* Savat — chek shaklidagi pastki panel */
+  /* ===== Cart ticket ===== */
   .cart-ticket{
     position: fixed;
     left: 14px; right:14px; bottom: 14px;
-    background: var(--ink);
-    color:#fff;
-    border-radius: 16px;
-    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--gold);
+    border-radius: 14px;
+    padding: 13px 16px;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    box-shadow: 0 10px 30px rgba(38,28,18,.28);
+    box-shadow: 0 10px 30px rgba(0,0,0,.5);
     transform: translateY(120%);
     transition: transform .25s ease;
     z-index: 30;
     cursor:pointer;
   }
   .cart-ticket.show{ transform: translateY(0); }
-  .cart-ticket::before{
-    content:"";
-    position:absolute;
-    top:-6px; left:50%;
-    width:30px; height:12px;
-    background: var(--bg);
-    border-radius: 0 0 10px 10px;
-    transform: translateX(-50%);
-  }
   .cart-ticket .count{
-    background: var(--saffron);
-    color:#2B1B05;
+    background: var(--gold);
+    color:#1B1304;
     font-weight:800;
     font-size:12px;
     padding: 3px 9px;
     border-radius: 999px;
     margin-right:10px;
   }
-  .cart-ticket .label{ font-size: 13.5px; font-weight:600; flex-grow:1;}
-  .cart-ticket .total{ font-weight:800; font-size:15px; }
+  .cart-ticket .label{ font-size: 13.5px; font-weight:600; flex-grow:1; color:var(--ink);}
+  .cart-ticket .total{ font-weight:800; font-size:15px; color: var(--gold-soft); }
 
-  /* Drawer */
+  /* ===== Drawer ===== */
   .overlay{
     position:fixed; inset:0;
-    background: rgba(38,28,18,.45);
+    background: rgba(0,0,0,.6);
     opacity:0; pointer-events:none;
     transition: opacity .2s ease;
     z-index: 40;
@@ -231,82 +235,57 @@
   .drawer{
     position:fixed;
     left:0; right:0; bottom:0;
-    background: var(--bg);
-    border-radius: 22px 22px 0 0;
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    border-top: 1px solid var(--line);
     padding: 18px 18px 28px;
     transform: translateY(105%);
     transition: transform .28s ease;
     z-index: 50;
-    max-height: 78vh;
+    max-height: 80vh;
     overflow-y:auto;
   }
   .drawer.show{ transform: translateY(0); }
   .drawer h2{
     font-family:'Archivo Black', sans-serif;
-    font-size:19px;
+    font-size:18px;
     margin: 4px 0 14px;
+    color: var(--ink);
   }
   .cart-row{
     display:flex;
     align-items:center;
-    justify-content:space-between;
-    padding: 10px 0;
-    border-bottom: 1px dashed var(--line);
     gap:10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
   }
-  .cart-row .name{ font-weight:700; font-size:13.5px;}
-  .cart-row .price{ font-size:12.5px; color:var(--ink-soft); font-weight:600;}
+  .cart-row img.thumb, .cart-row .thumb-fallback{
+    width:42px; height:42px;
+    border-radius:10px;
+    object-fit:cover;
+    flex:0 0 auto;
+    background: var(--surface2);
+  }
+  .cart-row .thumb-fallback{
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px;
+  }
+  .cart-row .info{ flex-grow:1; }
+  .cart-row .name{ font-weight:700; font-size:13px; color:var(--ink); margin-bottom:2px;}
+  .cart-row .price{ font-size:12px; color:var(--ink-dim); font-weight:600;}
   .remove{
     background:none; border:none;
-    color: var(--brick);
-    font-size:12px;
+    color: #D9694A;
+    font-size:11.5px;
     font-weight:700;
     cursor:pointer;
   }
-  textarea{
-    width:100%;
-    margin-top:12px;
-    border-radius: 12px;
-    border: 1px solid var(--line);
-    padding: 10px 12px;
-    font-family:'Manrope', sans-serif;
-    font-size:13px;
-    resize:none;
-    background:#fff;
-  }
-  .subtotal{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin: 16px 0 4px;
-    font-weight:800;
-    font-size:16px;
-  }
-  .order-btn{
-    width:100%;
-    border:none;
-    background: var(--olive);
-    color:#fff;
-    font-weight:800;
-    font-size:14.5px;
-    padding: 14px 0;
-    border-radius: 14px;
-    margin-top: 10px;
-    cursor:pointer;
-  }
-  .empty{
-    text-align:center;
-    color: var(--ink-soft);
-    font-size:13.5px;
-    padding: 30px 0;
-  }
-
   .location-btn{
     width:100%;
     margin-top:12px;
-    border:1px dashed var(--olive);
-    background: #fff;
-    color: var(--olive);
+    border:1px solid var(--gold);
+    background: transparent;
+    color: var(--gold-soft);
     font-weight:700;
     font-size:13px;
     padding: 11px 0;
@@ -319,22 +298,64 @@
     justify-content:space-between;
     gap:8px;
     margin-top:12px;
-    background: #fff;
+    background: var(--surface2);
     border: 1px solid var(--line);
     border-radius: 12px;
     padding: 10px 12px;
     font-size:12px;
     font-weight:600;
-    color: var(--olive);
+    color: var(--gold-soft);
   }
   .location-chip button{
     background:none; border:none;
-    color: var(--brick);
+    color: #D9694A;
     font-size:11.5px;
     font-weight:700;
     cursor:pointer;
     flex:0 0 auto;
   }
+  textarea{
+    width:100%;
+    margin-top:12px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    font-family:'Manrope', sans-serif;
+    font-size:13px;
+    resize:none;
+    background: var(--surface2);
+    color: var(--ink);
+  }
+  textarea::placeholder{ color: var(--ink-dim); }
+  .subtotal{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin: 16px 0 4px;
+    font-weight:800;
+    font-size:16px;
+    color: var(--ink);
+  }
+  .order-btn{
+    width:100%;
+    border:none;
+    background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+    color:#1B1304;
+    font-weight:800;
+    font-size:14.5px;
+    padding: 14px 0;
+    border-radius: 14px;
+    margin-top: 10px;
+    cursor:pointer;
+  }
+  .empty{
+    text-align:center;
+    color: var(--ink-dim);
+    font-size:13.5px;
+    padding: 30px 0;
+  }
+
+  /* ===== Map picker ===== */
   .map-overlay{
     position:fixed; inset:0;
     background: var(--bg);
@@ -357,16 +378,15 @@
     font-family:'Archivo Black', sans-serif;
     font-size:16px;
     margin:0;
+    color: var(--ink);
   }
   .map-header button{
     border:none; background:none;
     font-size:22px;
-    color: var(--ink-soft);
+    color: var(--ink-dim);
     cursor:pointer;
   }
-  #mapContainer{
-    flex-grow:1;
-  }
+  #mapContainer{ flex-grow:1; }
   .map-footer{
     padding: 14px 18px 24px;
     border-top: 1px solid var(--line);
@@ -374,15 +394,15 @@
   }
   .map-hint{
     font-size:12px;
-    color: var(--ink-soft);
+    color: var(--ink-dim);
     text-align:center;
     margin: 0 0 10px;
   }
   .confirm-location-btn{
     width:100%;
     border:none;
-    background: var(--olive);
-    color:#fff;
+    background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+    color:#1B1304;
     font-weight:800;
     font-size:14.5px;
     padding: 14px 0;
@@ -393,11 +413,18 @@
 </head>
 <body>
 
-<header class="topbar">
-  <div class="eyebrow">Buyurtma — onlayn</div>
-  <h1 id="shopName">Lavash Ustasi</h1>
-  <p id="shopTagline">Issiq lavash, somsa va burgerlar — 20 daqiqada tayyor</p>
-</header>
+<div class="hero" id="hero">
+  <div class="hero-content">
+    <div class="eyebrow">Premium buyurtma</div>
+    <h1 id="shopName">Lavash Ustasi</h1>
+    <p id="shopTagline">Issiq lavash, burger va fast-food — 20 daqiqada tayyor</p>
+    <div class="meta">
+      <span class="gold">⭐ <span id="shopRating">4.9</span></span>
+      <span class="dim">·</span>
+      <span class="dim" id="shopOrders">500+ buyurtma</span>
+    </div>
+  </div>
+</div>
 
 <nav class="categories" id="categories"></nav>
 <main class="grid" id="productGrid"></main>
@@ -440,28 +467,58 @@
 <script>
 /* ======================================================
    SOZLASH BO'LIMI — har bir yangi mijoz (do'kon) uchun
-   FAQAT shu bo'limni o'zgartiring. Pastdagi kodga tegmasangiz
-   ham ishlayveradi.
+   FAQAT shu bo'limni o'zgartiring.
+   img maydoni: "images/fayl-nomi.jpg" — shu repo ichidagi
+   "images" papkasiga yuklangan rasm fayli nomi.
+   Rasm bo'lmasa yoki yuklanmasa, avtomatik emoji ko'rsatiladi.
    ====================================================== */
 const CONFIG = {
   shopName: "Lavash Ustasi",
-  shopTagline: "Issiq lavash, somsa va burgerlar — 20 daqiqada tayyor",
+  shopTagline: "Issiq lavash, burger va fast-food — 20 daqiqada tayyor",
+  shopRating: "4.9",
+  shopOrders: "500+ buyurtma",
   // Buyurtma matni shu Telegram username'ga (do'kon egasiga) boradi:
   shopTelegramUsername: "nasriddinov1018", // @ belgisisiz yozing
   currency: "so'm"
 };
 
 const PRODUCTS = [
-  { id: 1, cat: "Lavashlar", emoji: "🌯", name: "Lavash (tovuq)", desc: "Tovuq, achchiq-chuchuk, sous", price: 22000 },
-  { id: 2, cat: "Lavashlar", emoji: "🌯", name: "Lavash (gosht)", desc: "Mol go'shti, sabzavotlar, sous", price: 26000 },
-  { id: 3, cat: "Lavashlar", emoji: "🌯", name: "Lavash (jigar)", desc: "Jigar qovurma, piyoz, sous", price: 24000 },
-  { id: 4, cat: "Burgerlar", emoji: "🍔", name: "Klassik burger", desc: "Mol kotleti, pomidor, pishloq", price: 28000 },
-  { id: 5, cat: "Burgerlar", emoji: "🍔", name: "Chizburger", desc: "Qo'sh pishloq, ikki kotlet", price: 34000 },
-  { id: 6, cat: "Somsalar", emoji: "🥟", name: "Gosht somsa", desc: "Tandirda pishirilgan, 1 dona", price: 8000 },
-  { id: 7, cat: "Somsalar", emoji: "🥟", name: "Kartoshka somsa", desc: "Vegetarian, 1 dona", price: 6000 },
-  { id: 8, cat: "Ichimliklar", emoji: "🥤", name: "Coca-Cola 0.5L", desc: "Sovuq", price: 9000 },
-  { id: 9, cat: "Ichimliklar", emoji: "🧃", name: "Ayron 0.5L", desc: "Uy qatig'idan", price: 7000 },
-  { id: 10, cat: "Salatlar", emoji: "🥗", name: "Fav salat", desc: "Pomidor, bodring, ko'katlar", price: 12000 }
+  { id: 1,  cat: "Lavashlar",      emoji: "🌯", img: "images/lavash-tovuq.jpg",       name: "Lavash (tovuq go'shtli)",  desc: "", price: 28000 },
+  { id: 2,  cat: "Lavashlar",      emoji: "🌯", img: "images/lavash-mol.jpg",         name: "Lavash (mol go'shtli)",    desc: "", price: 30000 },
+  { id: 3,  cat: "Lavashlar",      emoji: "🌯", img: "images/lavash-aralash.jpg",     name: "Aralash lavash",           desc: "", price: 32000 },
+  { id: 4,  cat: "Lavashlar",      emoji: "🌯", img: "images/lavash-chizburger.jpg",  name: "Chizburger lavash",        desc: "", price: 30000 },
+  { id: 5,  cat: "Lavashlar",      emoji: "🌯", img: "images/lavash-achchiq.jpg",     name: "Achchiqli lavash",         desc: "", price: 29000 },
+
+  { id: 6,  cat: "Burgerlar",      emoji: "🍔", img: "images/burger-klassik.jpg",     name: "Klassik burger",           desc: "", price: 26000 },
+  { id: 7,  cat: "Burgerlar",      emoji: "🍔", img: "images/burger-chiz.jpg",        name: "Chizburger",               desc: "", price: 28000 },
+  { id: 8,  cat: "Burgerlar",      emoji: "🍔", img: "images/burger-double.jpg",      name: "Double burger",            desc: "", price: 36000 },
+  { id: 9,  cat: "Burgerlar",      emoji: "🍔", img: "images/burger-bbq.jpg",         name: "BBQ burger",               desc: "", price: 32000 },
+  { id: 10, cat: "Burgerlar",      emoji: "🍔", img: "images/burger-tovuq.jpg",       name: "Tovuq burger",             desc: "", price: 27000 },
+
+  { id: 11, cat: "Hot Dog",        emoji: "🌭", img: "images/hotdog-klassik.jpg",     name: "Klassik hot dog",          desc: "", price: 20000 },
+  { id: 12, cat: "Hot Dog",        emoji: "🌭", img: "images/hotdog-achchiq.jpg",     name: "Achchiqli hot dog",        desc: "", price: 22000 },
+  { id: 13, cat: "Hot Dog",        emoji: "🌭", img: "images/hotdog-pishloqli.jpg",   name: "Pishloqli hot dog",        desc: "", price: 22000 },
+  { id: 14, cat: "Hot Dog",        emoji: "🌭", img: "images/hotdog-bbq.jpg",         name: "BBQ hot dog",              desc: "", price: 24000 },
+  { id: 15, cat: "Hot Dog",        emoji: "🌭", img: "images/hotdog-tovuq.jpg",       name: "Tovuq hot dog",            desc: "", price: 22000 },
+
+  { id: 16, cat: "Pizza",          emoji: "🍕", img: "images/pizza-margarita.jpg",    name: "Margarita",                desc: "", price: 45000 },
+  { id: 17, cat: "Pizza",          emoji: "🍕", img: "images/pizza-pepperoni.jpg",    name: "Pepperoni",                desc: "", price: 55000 },
+  { id: 18, cat: "Pizza",          emoji: "🍕", img: "images/pizza-tovuqli.jpg",      name: "Tovuqli pizza",            desc: "", price: 55000 },
+  { id: 19, cat: "Pizza",          emoji: "🍕", img: "images/pizza-molgoshtli.jpg",   name: "Mol go'shtli pizza",       desc: "", price: 60000 },
+  { id: 20, cat: "Pizza",          emoji: "🍕", img: "images/pizza-aralash.jpg",      name: "Aralash pizza",            desc: "", price: 60000 },
+
+  { id: 21, cat: "Qo'shimchalar",  emoji: "🍟", img: "images/qoshimcha-fri.jpg",       name: "Kartoshka fri",           desc: "", price: 15000 },
+  { id: 22, cat: "Qo'shimchalar",  emoji: "🍗", img: "images/qoshimcha-nagget.jpg",    name: "Naggetslar",              desc: "", price: 20000 },
+  { id: 23, cat: "Qo'shimchalar",  emoji: "🥔", img: "images/qoshimcha-sipsi.jpg",     name: "Sipsi",                   desc: "", price: 15000 },
+  { id: 24, cat: "Qo'shimchalar",  emoji: "🧅", img: "images/qoshimcha-piyoz.jpg",     name: "Piyoz halqalari",         desc: "", price: 15000 },
+  { id: 25, cat: "Qo'shimchalar",  emoji: "🧀", img: "images/qoshimcha-mozzarella.jpg",name: "Mozzarella stik",         desc: "", price: 20000 },
+
+  { id: 26, cat: "Ichimliklar",    emoji: "🥤", img: "images/drink-cola.jpg",          name: "Coca-Cola 0.5L",          desc: "", price: 10000 },
+  { id: 27, cat: "Ichimliklar",    emoji: "🥤", img: "images/drink-fanta.jpg",         name: "Fanta 0.5L",              desc: "", price: 10000 },
+  { id: 28, cat: "Ichimliklar",    emoji: "🥤", img: "images/drink-sprite.jpg",        name: "Sprite 0.5L",             desc: "", price: 10000 },
+  { id: 29, cat: "Ichimliklar",    emoji: "🥤", img: "images/drink-pepsi.jpg",         name: "Pepsi 0.5L",              desc: "", price: 10000 },
+  { id: 30, cat: "Ichimliklar",    emoji: "🧃", img: "images/drink-ayron.jpg",         name: "Ayron 0.5L",              desc: "", price: 8000 },
+  { id: 31, cat: "Ichimliklar",    emoji: "💧", img: "images/drink-su.jpg",            name: "Su 0.5L",                 desc: "", price: 5000 }
 ];
 /* ====================================================== */
 
@@ -470,6 +527,8 @@ if (tg) { tg.ready(); tg.expand(); }
 
 document.getElementById('shopName').textContent = CONFIG.shopName;
 document.getElementById('shopTagline').textContent = CONFIG.shopTagline;
+document.getElementById('shopRating').textContent = CONFIG.shopRating;
+document.getElementById('shopOrders').textContent = CONFIG.shopOrders;
 
 let activeCategory = "Hammasi";
 let cart = {}; // id -> qty
@@ -499,177 +558,39 @@ function renderGrid(){
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <div class="emoji">${p.emoji}</div>
-      <div class="name">${p.name}</div>
-      <div class="desc">${p.desc}</div>
-      <div class="row" style="margin-bottom:8px;">
-        <span class="price">${fmt(p.price)}</span>
+      <div class="img-wrap">
+        ${p.img
+          ? `<img class="product-img" src="${p.img}" alt="${p.name}" loading="lazy" data-emoji="${p.emoji}">`
+          : `<div class="img-fallback">${p.emoji}</div>`
+        }
+        ${qty > 0
+          ? `<div class="stepper-fab">
+               <button data-action="dec" data-id="${p.id}">−</button>
+               <span class="qty">${qty}</span>
+               <button data-action="inc" data-id="${p.id}">+</button>
+             </div>`
+          : `<button class="add-fab" data-action="add" data-id="${p.id}">+</button>`
+        }
       </div>
-      ${qty > 0
-        ? `<div class="stepper" style="width:100%; justify-content:space-between;">
-             <button data-action="dec" data-id="${p.id}">−</button>
-             <span class="qty">${qty}</span>
-             <button data-action="inc" data-id="${p.id}">+</button>
-           </div>`
-        : `<button class="add-btn" data-action="add" data-id="${p.id}">Savatga</button>`
-      }
+      <div class="body">
+        <div class="name">${p.name}</div>
+        <div class="price">${fmt(p.price)}</div>
+      </div>
     `;
     grid.appendChild(card);
   });
 
-  grid.querySelectorAll('button').forEach(btn => {
+  grid.querySelectorAll('img.product-img').forEach(img => {
+    img.addEventListener('error', () => {
+      const fb = document.createElement('div');
+      fb.className = 'img-fallback';
+      fb.textContent = img.dataset.emoji;
+      img.replaceWith(fb);
+    });
+  });
+
+  grid.querySelectorAll('button[data-action]').forEach(btn => {
     btn.onclick = () => {
       const id = Number(btn.dataset.id);
       const action = btn.dataset.action;
-      if (action === 'add' || action === 'inc') cart[id] = (cart[id] || 0) + 1;
-      if (action === 'dec') cart[id] = Math.max(0, (cart[id] || 0) - 1);
-      if (cart[id] === 0) delete cart[id];
-      if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-      renderGrid();
-      renderCartTicket();
-    };
-  });
-}
-
-function cartEntries(){
-  return Object.entries(cart).map(([id, qty]) => {
-    const p = PRODUCTS.find(p => p.id === Number(id));
-    return { ...p, qty };
-  });
-}
-
-function cartTotal(){
-  return cartEntries().reduce((sum, p) => sum + p.price * p.qty, 0);
-}
-
-function renderCartTicket(){
-  const entries = cartEntries();
-  const count = entries.reduce((s, p) => s + p.qty, 0);
-  const ticket = document.getElementById('cartTicket');
-  document.getElementById('cartCount').textContent = count;
-  document.getElementById('cartTotal').textContent = fmt(cartTotal());
-  ticket.classList.toggle('show', count > 0);
-}
-
-function renderDrawer(){
-  const wrap = document.getElementById('cartItems');
-  const entries = cartEntries();
-  if (entries.length === 0){
-    wrap.innerHTML = '<div class="empty">Savat bo\'sh</div>';
-  } else {
-    wrap.innerHTML = entries.map(p => `
-      <div class="cart-row">
-        <div>
-          <div class="name">${p.emoji} ${p.name} × ${p.qty}</div>
-          <div class="price">${fmt(p.price * p.qty)}</div>
-        </div>
-        <button class="remove" data-id="${p.id}">O'chirish</button>
-      </div>
-    `).join("");
-    wrap.querySelectorAll('.remove').forEach(btn => {
-      btn.onclick = () => {
-        delete cart[Number(btn.dataset.id)];
-        renderDrawer(); renderGrid(); renderCartTicket();
-      };
-    });
-  }
-  document.getElementById('drawerTotal').textContent = fmt(cartTotal());
-}
-
-function openDrawer(){
-  renderDrawer();
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('cartDrawer').classList.add('show');
-}
-function closeDrawer(){
-  document.getElementById('overlay').classList.remove('show');
-  document.getElementById('cartDrawer').classList.remove('show');
-}
-
-document.getElementById('cartTicket').onclick = openDrawer;
-document.getElementById('overlay').onclick = closeDrawer;
-
-/* ===== Manzilni xaritadan tanlash ===== */
-let selectedLocation = null; // {lat, lng}
-let leafletMap = null;
-let leafletMarker = null;
-const DEFAULT_CENTER = [41.311081, 69.279737]; // Toshkent markazi — zaxira nuqta
-
-function openMapPicker(){
-  document.getElementById('mapOverlay').classList.add('show');
-  setTimeout(() => {
-    if (!leafletMap){
-      leafletMap = L.map('mapContainer', { zoomControl: true }).setView(DEFAULT_CENTER, 14);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-      }).addTo(leafletMap);
-      leafletMarker = L.marker(DEFAULT_CENTER, { draggable: true }).addTo(leafletMap);
-      leafletMap.on('click', (e) => { leafletMarker.setLatLng(e.latlng); });
-    }
-    leafletMap.invalidateSize();
-  }, 50);
-
-  if (navigator.geolocation){
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const coords = [pos.coords.latitude, pos.coords.longitude];
-      if (leafletMap){ leafletMap.setView(coords, 16); leafletMarker.setLatLng(coords); }
-    }, () => { /* ruxsat berilmadi — standart markazda qoladi */ }, { timeout: 6000 });
-  }
-}
-
-function closeMapPicker(){
-  document.getElementById('mapOverlay').classList.remove('show');
-}
-
-document.getElementById('pickLocationBtn').onclick = openMapPicker;
-document.getElementById('changeLocationBtn').onclick = openMapPicker;
-document.getElementById('closeMapBtn').onclick = closeMapPicker;
-
-document.getElementById('confirmLocationBtn').onclick = () => {
-  const pos = leafletMarker.getLatLng();
-  selectedLocation = { lat: pos.lat.toFixed(6), lng: pos.lng.toFixed(6) };
-  document.getElementById('locationChipText').textContent = `📍 Manzil tanlandi (${selectedLocation.lat}, ${selectedLocation.lng})`;
-  document.getElementById('locationChip').style.display = 'flex';
-  document.getElementById('pickLocationBtn').style.display = 'none';
-  if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-  closeMapPicker();
-};
-/* ===== /Manzil tanlash ===== */
-
-document.getElementById('submitOrder').onclick = () => {
-  const entries = cartEntries();
-  if (entries.length === 0){
-    if (tg && tg.showAlert) tg.showAlert("Avval savatga mahsulot qo'shing");
-    else alert("Avval savatga mahsulot qo'shing");
-    return;
-  }
-  const note = document.getElementById('noteField').value.trim();
-  let text = `🛍 Yangi buyurtma — ${CONFIG.shopName}\n\n`;
-  entries.forEach(p => { text += `${p.emoji} ${p.name} × ${p.qty} — ${fmt(p.price * p.qty)}\n`; });
-  text += `\nJami: ${fmt(cartTotal())}`;
-  if (selectedLocation){
-    text += `\n\n📍 Manzil (xarita): https://www.google.com/maps?q=${selectedLocation.lat},${selectedLocation.lng}`;
-  }
-  if (note) text += `\n📝 Izoh: ${note}`;
-
-  const url = `https://t.me/${CONFIG.shopTelegramUsername}?text=${encodeURIComponent(text)}`;
-  if (tg && tg.openTelegramLink) {
-    tg.openTelegramLink(url);
-  } else {
-    window.open(url, '_blank');
-  }
-};
-
-renderCategories();
-renderGrid();
-renderCartTicket();
-
-if (tg) {
-  if (tg.setHeaderColor) tg.setHeaderColor('#FAF6EC');
-  if (tg.setBackgroundColor) tg.setBackgroundColor('#FAF6EC');
-}
-</script>
-</body>
-    </html>
-  
-    
+      if (action === 'add' || action === 'inc') cart[id] = (cart[id] |
