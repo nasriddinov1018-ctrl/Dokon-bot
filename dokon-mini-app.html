@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Lavash Ustasi — Buyurtma</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FAF6EC;
+    --ink: #261C12;
+    --ink-soft: #6B5E4D;
+    --olive: #4E6038;
+    --saffron: #E8A23A;
+    --brick: #B3472E;
+    --card: #FFFFFF;
+    --line: #ECE3D2;
+    --radius: 18px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Manrope', sans-serif;
+    padding-bottom: 110px;
+    overscroll-behavior-y: contain;
+  }
+  .topbar{
+    padding: 22px 18px 14px;
+    background: linear-gradient(180deg, #FFFDF8 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar .eyebrow{
+    font-size: 12px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--olive);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .topbar h1{
+    font-family:'Archivo Black', sans-serif;
+    font-size: 28px;
+    line-height: 1.05;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .topbar p{
+    margin:0;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+  }
+  .categories{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding: 14px 18px;
+    scrollbar-width:none;
+  }
+  .categories::-webkit-scrollbar{display:none;}
+  .pill{
+    flex:0 0 auto;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    white-space:nowrap;
+    cursor:pointer;
+  }
+  .pill.active{
+    background: var(--olive);
+    border-color: var(--olive);
+    color: #fff;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 4px 18px 18px;
+  }
+  .card{
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    padding: 14px 12px 12px;
+    display:flex;
+    flex-direction:column;
+    animation: rise .35s ease both;
+  }
+  @keyframes rise{
+    from{opacity:0; transform: translateY(8px);}
+    to{opacity:1; transform: translateY(0);}
+  }
+  .card .emoji{
+    font-size: 34px;
+    line-height:1;
+    margin-bottom: 8px;
+  }
+  .card .name{
+    font-weight: 700;
+    font-size: 14.5px;
+    margin-bottom: 2px;
+  }
+  .card .desc{
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+    flex-grow:1;
+  }
+  .card .row{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+  }
+  .price{
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--brick);
+  }
+  .stepper{
+    display:flex;
+    align-items:center;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+  }
+  .stepper button{
+    width:28px; height:28px;
+    border:none;
+    background:none;
+    font-size:16px;
+    font-weight:700;
+    color: var(--olive);
+    cursor:pointer;
+  }
+  .stepper .qty{
+    min-width: 18px;
+    text-align:center;
+    font-weight:700;
+    font-size:13px;
+  }
+  .add-btn{
+    border:none;
+    background: var(--saffron);
+    color: #2B1B05;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 8px 0;
+    border-radius: 999px;
+    width:100%;
+    cursor:pointer;
+  }
+
+  /* Savat — chek shaklidagi pastki panel */
+  .cart-ticket{
+    position: fixed;
+    left: 14px; right:14px; bottom: 14px;
+    background: var(--ink);
+    color:#fff;
+    border-radius: 16px;
+    padding: 14px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    box-shadow: 0 10px 30px rgba(38,28,18,.28);
+    transform: translateY(120%);
+    transition: transform .25s ease;
+    z-index: 30;
+    cursor:pointer;
+  }
+  .cart-ticket.show{ transform: translateY(0); }
+  .cart-ticket::before{
+    content:"";
+    position:absolute;
+    top:-6px; left:50%;
+    width:30px; height:12px;
+    background: var(--bg);
+    border-radius: 0 0 10px 10px;
+    transform: translateX(-50%);
+  }
+  .cart-ticket .count{
+    background: var(--saffron);
+    color:#2B1B05;
+    font-weight:800;
+    font-size:12px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    margin-right:10px;
+  }
+  .cart-ticket .label{ font-size: 13.5px; font-weight:600; flex-grow:1;}
+  .cart-ticket .total{ font-weight:800; font-size:15px; }
+
+  /* Drawer */
+  .overlay{
+    position:fixed; inset:0;
+    background: rgba(38,28,18,.45);
+    opacity:0; pointer-events:none;
+    transition: opacity .2s ease;
+    z-index: 40;
+  }
+  .overlay.show{ opacity:1; pointer-events:auto; }
+  .drawer{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    background: var(--bg);
+    border-radius: 22px 22px 0 0;
+    padding: 18px 18px 28px;
+    transform: translateY(105%);
+    transition: transform .28s ease;
+    z-index: 50;
+    max-height: 78vh;
+    overflow-y:auto;
+  }
+  .drawer.show{ transform: translateY(0); }
+  .drawer h2{
+    font-family:'Archivo Black', sans-serif;
+    font-size:19px;
+    margin: 4px 0 14px;
+  }
+  .cart-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--line);
+    gap:10px;
+  }
+  .cart-row .name{ font-weight:700; font-size:13.5px;}
+  .cart-row .price{ font-size:12.5px; color:var(--ink-soft); font-weight:600;}
+  .remove{
+    background:none; border:none;
+    color: var(--brick);
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  textarea{
+    width:100%;
+    margin-top:12px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    font-family:'Manrope', sans-serif;
+    font-size:13px;
+    resize:none;
+    background:#fff;
+  }
+  .subtotal{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin: 16px 0 4px;
+    font-weight:800;
+    font-size:16px;
+  }
+  .order-btn{
+    width:100%;
+    border:none;
+    background: var(--olive);
+    color:#fff;
+    font-weight:800;
+    font-size:14.5px;
+    padding: 14px 0;
+    border-radius: 14px;
+    margin-top: 10px;
+    cursor:pointer;
+  }
+  .empty{
+    text-align:center;
+    color: var(--ink-soft);
+    font-size:13.5px;
+    padding: 30px 0;
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="eyebrow">Buyurtma — onlayn</div>
+  <h1 id="shopName">Lavash Ustasi</h1>
+  <p id="shopTagline">Issiq lavash, somsa va burgerlar — 20 daqiqada tayyor</p>
+</header>
+
+<nav class="categories" id="categories"></nav>
+<main class="grid" id="productGrid"></main>
+
+<div class="cart-ticket" id="cartTicket">
+  <span class="count" id="cartCount">0</span>
+  <span class="label">Savat</span>
+  <span class="total" id="cartTotal">0 so'm</span>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="cartDrawer">
+  <h2>Savatingiz</h2>
+  <div id="cartItems"></div>
+  <textarea id="noteField" rows="2" placeholder="Manzil yoki izoh (ixtiyoriy)"></textarea>
+  <div class="subtotal">
+    <span>Jami</span>
+    <span id="drawerTotal">0 so'm</span>
+  </div>
+  <button class="order-btn" id="submitOrder">Buyurtma berish</button>
+</div>
+
+<script>
+/* ======================================================
+   SOZLASH BO'LIMI — har bir yangi mijoz (do'kon) uchun
+   FAQAT shu bo'limni o'zgartiring. Pastdagi kodga tegmasangiz
+   ham ishlayveradi.
+   ====================================================== */
+const CONFIG = {
+  shopName: "Lavash Ustasi",
+  shopTagline: "Issiq lavash, somsa va burgerlar — 20 daqiqada tayyor",
+  // Buyurtma matni shu Telegram username'ga (do'kon egasiga) boradi:
+  shopTelegramUsername: "your_shop_username", // @ belgisisiz yozing
+  currency: "so'm"
+};
+
+const PRODUCTS = [
+  { id: 1, cat: "Lavashlar", emoji: "🌯", name: "Lavash (tovuq)", desc: "Tovuq, achchiq-chuchuk, sous", price: 22000 },
+  { id: 2, cat: "Lavashlar", emoji: "🌯", name: "Lavash (gosht)", desc: "Mol go'shti, sabzavotlar, sous", price: 26000 },
+  { id: 3, cat: "Lavashlar", emoji: "🌯", name: "Lavash (jigar)", desc: "Jigar qovurma, piyoz, sous", price: 24000 },
+  { id: 4, cat: "Burgerlar", emoji: "🍔", name: "Klassik burger", desc: "Mol kotleti, pomidor, pishloq", price: 28000 },
+  { id: 5, cat: "Burgerlar", emoji: "🍔", name: "Chizburger", desc: "Qo'sh pishloq, ikki kotlet", price: 34000 },
+  { id: 6, cat: "Somsalar", emoji: "🥟", name: "Gosht somsa", desc: "Tandirda pishirilgan, 1 dona", price: 8000 },
+  { id: 7, cat: "Somsalar", emoji: "🥟", name: "Kartoshka somsa", desc: "Vegetarian, 1 dona", price: 6000 },
+  { id: 8, cat: "Ichimliklar", emoji: "🥤", name: "Coca-Cola 0.5L", desc: "Sovuq", price: 9000 },
+  { id: 9, cat: "Ichimliklar", emoji: "🧃", name: "Ayron 0.5L", desc: "Uy qatig'idan", price: 7000 },
+  { id: 10, cat: "Salatlar", emoji: "🥗", name: "Fav salat", desc: "Pomidor, bodring, ko'katlar", price: 12000 }
+];
+/* ====================================================== */
+
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+if (tg) { tg.ready(); tg.expand(); }
+
+document.getElementById('shopName').textContent = CONFIG.shopName;
+document.getElementById('shopTagline').textContent = CONFIG.shopTagline;
+
+let activeCategory = "Hammasi";
+let cart = {}; // id -> qty
+
+const categories = ["Hammasi", ...new Set(PRODUCTS.map(p => p.cat))];
+
+function fmt(n){ return n.toLocaleString('uz-UZ') + " " + CONFIG.currency; }
+
+function renderCategories(){
+  const wrap = document.getElementById('categories');
+  wrap.innerHTML = "";
+  categories.forEach(cat => {
+    const pill = document.createElement('button');
+    pill.className = 'pill' + (cat === activeCategory ? ' active' : '');
+    pill.textContent = cat;
+    pill.onclick = () => { activeCategory = cat; renderCategories(); renderGrid(); };
+    wrap.appendChild(pill);
+  });
+}
+
+function renderGrid(){
+  const grid = document.getElementById('productGrid');
+  grid.innerHTML = "";
+  const items = activeCategory === "Hammasi" ? PRODUCTS : PRODUCTS.filter(p => p.cat === activeCategory);
+  items.forEach(p => {
+    const qty = cart[p.id] || 0;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="emoji">${p.emoji}</div>
+      <div class="name">${p.name}</div>
+      <div class="desc">${p.desc}</div>
+      <div class="row" style="margin-bottom:8px;">
+        <span class="price">${fmt(p.price)}</span>
+      </div>
+      ${qty > 0
+        ? `<div class="stepper" style="width:100%; justify-content:space-between;">
+             <button data-action="dec" data-id="${p.id}">−</button>
+             <span class="qty">${qty}</span>
+             <button data-action="inc" data-id="${p.id}">+</button>
+           </div>`
+        : `<button class="add-btn" data-action="add" data-id="${p.id}">Savatga</button>`
+      }
+    `;
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      const id = Number(btn.dataset.id);
+      const action = btn.dataset.action;
+      if (action === 'add' || action === 'inc') cart[id] = (cart[id] || 0) + 1;
+      if (action === 'dec') cart[id] = Math.max(0, (cart[id] || 0) - 1);
+      if (cart[id] === 0) delete cart[id];
+      if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+      renderGrid();
+      renderCartTicket();
+    };
+  });
+}
+
+function cartEntries(){
+  return Object.entries(cart).map(([id, qty]) => {
+    const p = PRODUCTS.find(p => p.id === Number(id));
+    return { ...p, qty };
+  });
+}
+
+function cartTotal(){
+  return cartEntries().reduce((sum, p) => sum + p.price * p.qty, 0);
+}
+
+function renderCartTicket(){
+  const entries = cartEntries();
+  const count = entries.reduce((s, p) => s + p.qty, 0);
+  const ticket = document.getElementById('cartTicket');
+  document.getElementById('cartCount').textContent = count;
+  document.getElementById('cartTotal').textContent = fmt(cartTotal());
+  ticket.classList.toggle('show', count > 0);
+}
+
+function renderDrawer(){
+  const wrap = document.getElementById('cartItems');
+  const entries = cartEntries();
+  if (entries.length === 0){
+    wrap.innerHTML = '<div class="empty">Savat bo\'sh</div>';
+  } else {
+    wrap.innerHTML = entries.map(p => `
+      <div class="cart-row">
+        <div>
+          <div class="name">${p.emoji} ${p.name} × ${p.qty}</div>
+          <div class="price">${fmt(p.price * p.qty)}</div>
+        </div>
+        <button class="remove" data-id="${p.id}">O'chirish</button>
+      </div>
+    `).join("");
+    wrap.querySelectorAll('.remove').forEach(btn => {
+      btn.onclick = () => {
+        delete cart[Number(btn.dataset.id)];
+        renderDrawer(); renderGrid(); renderCartTicket();
+      };
+    });
+  }
+  document.getElementById('drawerTotal').textContent = fmt(cartTotal());
+}
+
+function openDrawer(){
+  renderDrawer();
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cartDrawer').classList.add('show');
+}
+function closeDrawer(){
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('cartDrawer').classList.remove('show');
+}
+
+document.getElementById('cartTicket').onclick = openDrawer;
+document.getElementById('overlay').onclick = closeDrawer;
+
+document.getElementById('submitOrder').onclick = () => {
+  const entries = cartEntries();
+  if (entries.length === 0) return;
+  const note = document.getElementById('noteField').value.trim();
+  let text = `🛍 Yangi buyurtma — ${CONFIG.shopName}\n\n`;
+  entries.forEach(p => { text += `${p.emoji} ${p.name} × ${p.qty} — ${fmt(p.price * p.qty)}\n`; });
+  text += `\nJami: ${fmt(cartTotal())}`;
+  if (note) text += `\n\n📍 Izoh: ${note}`;
+
+  const url = `https://t.me/${CONFIG.shopTelegramUsername}?text=${encodeURIComponent(text)}`;
+  if (tg && tg.openTelegramLink) {
+    tg.openTelegramLink(url);
+  } else {
+    window.open(url, '_blank');
+  }
+};
+
+renderCategories();
+renderGrid();
+renderCartTicket();
+
+if (tg) {
+  if (tg.setHeaderColor) tg.setHeaderColor('#FAF6EC');
+  if (tg.setBackgroundColor) tg.setBackgroundColor('#FAF6EC');
+}
+</script>
+</body>
+</html>
